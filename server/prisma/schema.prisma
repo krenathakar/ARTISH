@@ -1,0 +1,132 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  IN_PROGRESS
+  CONVERTED
+  CLOSED
+}
+
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  description String   @db.Text
+  icon        String   @default("Camera")
+  image       String?  @db.Text
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Client {
+  id          Int         @id @default(autoincrement())
+  name        String
+  category    String
+  description String?     @db.Text
+  logo        String?     @db.Text
+  initials    String?
+  website     String?
+  instagram   String?
+  isFeatured  Boolean     @default(true)
+  isActive    Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  portfolios  Portfolio[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Portfolio {
+  id           Int      @id @default(autoincrement())
+  title        String
+  slug         String   @unique
+  category     String
+  description  String?  @db.Text
+  image        String?  @db.Text
+  videoUrl     String?
+  instagramUrl String?
+  externalUrl  String?
+  clientId     Int?
+  client       Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  isFeatured   Boolean  @default(true)
+  isPublished  Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  name        String
+  company     String
+  quote       String   @db.Text
+  image       String?  @db.Text
+  rating      Int      @default(5)
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Faq {
+  id          Int      @id @default(autoincrement())
+  question    String   @db.Text
+  answer      String   @db.Text
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Enquiry {
+  id           Int           @id @default(autoincrement())
+  fullName     String
+  businessName String
+  email        String
+  phone        String?
+  service      String
+  message      String        @db.Text
+  status       EnquiryStatus @default(NEW)
+  notes        String?       @db.Text
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model SiteSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  url       String   @db.Text
+  publicId  String?
+  filename  String
+  altText   String?
+  createdAt DateTime @default(now())
+}

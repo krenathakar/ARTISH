@@ -1,0 +1,35 @@
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Server upload & build artifacts
+server/uploads/*
+!server/uploads/.gitkeep
+dist/
+build/
+coverage/
+*.log
+
+# IDE & System files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+
+
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+
+client/public/videos/harsh-jatin.mp4
+client/public/videos/shayona-first.mp4
