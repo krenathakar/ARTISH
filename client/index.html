@@ -22,9 +22,87 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Suppress and remove any Netlify injected badge / branding element -->
+    <style id="suppress-netlify-badge">
+      iframe[src*="netlify"],
+      iframe[id*="netlify" i],
+      iframe[class*="netlify" i],
+      iframe[title*="Netlify" i],
+      [id*="netlify" i],
+      [class*="netlify-badge" i],
+      [data-netlify-badge],
+      netlify-badge,
+      #netlify-badge,
+      .netlify-badge {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        max-width: 0 !important;
+        max-height: 0 !important;
+        position: absolute !important;
+        z-index: -9999 !important;
+        clip: rect(0, 0, 0, 0) !important;
+        overflow: hidden !important;
+      }
+    </style>
+    <script>
+      (function() {
+        var selectors = [
+          'iframe[src*="netlify"]',
+          'iframe[id*="netlify" i]',
+          'iframe[class*="netlify" i]',
+          'iframe[title*="Netlify" i]',
+          '[id*="netlify" i]',
+          '[class*="netlify-badge" i]',
+          '[data-netlify-badge]',
+          'netlify-badge',
+          '#netlify-badge',
+          '.netlify-badge'
+        ];
+        function removeNetlifyElements() {
+          selectors.forEach(function(sel) {
+            try {
+              var matches = document.querySelectorAll(sel);
+              for (var i = 0; i < matches.length; i++) {
+                matches[i].remove();
+              }
+            } catch (e) {}
+          });
+          try {
+            localStorage.setItem('nl-hud:public:v1', 'hidden');
+          } catch (e) {}
+        }
+        removeNetlifyElements();
+        document.addEventListener('DOMContentLoaded', removeNetlifyElements);
+        window.addEventListener('load', removeNetlifyElements);
+        if (window.MutationObserver) {
+          var observer = new MutationObserver(function() {
+            removeNetlifyElements();
+          });
+          observer.observe(document.documentElement, { childList: true, subtree: true });
+        }
+      })();
+    </script>
   </head>
   <body class="bg-[#F7F8FA] text-[#101946] font-sans antialiased">
     <div id="root"></div>
+
+    <!-- Hidden form for Netlify Form detection & dashboard lead capture -->
+    <form name="consultation" netlify netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="consultation" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="fullName" />
+      <input type="text" name="businessName" />
+      <input type="email" name="email" />
+      <input type="tel" name="phone" />
+      <input type="text" name="service" />
+      <textarea name="message"></textarea>
+    </form>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

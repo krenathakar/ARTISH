@@ -42,6 +42,7 @@ export const ContactSection = () => {
   }, [setValue]);
 
   const onSubmit = async (data) => {
+    if (submitting) return;
     setSubmitting(true);
     setSuccessMessage('');
     setServerError('');
@@ -49,16 +50,45 @@ export const ContactSection = () => {
     try {
       const res = await API.post('/enquiries', data);
       setSuccessMessage(
-        res.data.message ||
+        res.data?.message ||
           "Thank you! Your consultation request has been received. We'll get back to you within 24 hours."
       );
       reset();
     } catch (err) {
-      console.error('Submission error:', err);
-      setServerError(
-        err.response?.data?.message ||
-          'Failed to submit request. Please try again or email us directly.'
-      );
+      console.error('Primary submission error:', err);
+
+      // Graceful fallback to Netlify Forms endpoint if API function is unreachable
+      let fallbackSuccess = false;
+      try {
+        const formData = new URLSearchParams();
+        formData.append('form-name', 'consultation');
+        Object.entries(data).forEach(([key, val]) => {
+          if (val) formData.append(key, val);
+        });
+
+        const fallbackRes = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData.toString(),
+        });
+
+        if (fallbackRes.ok) {
+          fallbackSuccess = true;
+          setSuccessMessage(
+            "Thank you! Your consultation request has been received. We'll get back to you within 24 hours."
+          );
+          reset();
+        }
+      } catch (fallbackErr) {
+        console.error('Fallback submission error:', fallbackErr);
+      }
+
+      if (!fallbackSuccess) {
+        setServerError(
+          err.response?.data?.message ||
+            'Failed to submit request. Please try again or email us directly at artish.uk.2003@gmail.com.'
+        );
+      }
     } finally {
       setSubmitting(false);
     }

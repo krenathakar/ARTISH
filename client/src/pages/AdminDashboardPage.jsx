@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
-import API from '../services/api';
+import API, { getAssetUrl } from '../services/api';
 
 export const AdminDashboardPage = () => {
   const { admin, logout, loading: authLoading } = useAuth();
@@ -686,7 +686,7 @@ export const AdminDashboardPage = () => {
               {portfolio.map((p) => (
                 <div key={p.id} className="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm overflow-hidden flex flex-col justify-between">
                   <div className="h-44 bg-gray-100 overflow-hidden relative">
-                    <img src={p.image || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80'} alt={p.title} className="w-full h-full object-cover" />
+                    <img src={getAssetUrl(p.image) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80'} alt={p.title} className="w-full h-full object-cover" />
                     <span className="absolute top-3 left-3 bg-[#101946] text-[#B8FF00] text-[10px] font-extrabold px-2.5 py-1 rounded-md">{p.category}</span>
                   </div>
                   <div className="p-5">
@@ -775,7 +775,7 @@ export const AdminDashboardPage = () => {
               <button
                 onClick={() => {
                   setEditingItem(null);
-                  setFormInput({ name: '', company: '', quote: '', rating: 5, isPublished: true });
+                  setFormInput({ name: '', company: '', quote: '', image: '', rating: 5, isPublished: true });
                   setModalType('testimonial');
                 }}
                 className="inline-flex items-center gap-2 bg-[#101946] text-[#B8FF00] font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-[#171B4B]"
@@ -789,15 +789,31 @@ export const AdminDashboardPage = () => {
               {testimonials.map((t) => (
                 <div key={t.id} className="bg-white p-6 rounded-3xl border border-[#E2E8F0] shadow-sm flex flex-col justify-between">
                   <div>
-                    <p className="text-sm font-bold text-[#101946] italic mb-3">"{t.quote}"</p>
-                    <p className="text-xs font-extrabold text-[#101946]">{t.name}</p>
-                    <p className="text-xs text-[#64748B]">{t.company}</p>
+                    <div className="flex items-center gap-3.5 mb-3">
+                      <img
+                        src={
+                          getAssetUrl(t.image) ||
+                          'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
+                        }
+                        alt={t.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-[#101946] shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80';
+                        }}
+                      />
+                      <div>
+                        <h4 className="text-sm font-extrabold text-[#101946]">{t.name}</h4>
+                        <p className="text-xs font-semibold text-[#64748B]">{t.company}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs font-medium text-[#101946]/80 italic line-clamp-3">"{t.quote}"</p>
                   </div>
                   <div className="flex items-center justify-end gap-2 pt-4 border-t border-[#E2E8F0] mt-4">
                     <button
                       onClick={() => {
                         setEditingItem(t);
-                        setFormInput({ ...t });
+                        setFormInput({ ...t, image: t.image || '' });
                         setModalType('testimonial');
                       }}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
@@ -1087,7 +1103,7 @@ export const AdminDashboardPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {mediaList.map((m) => (
                 <div key={m.id} className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden p-3 flex flex-col justify-between shadow-sm">
-                  <img src={m.url} alt={m.filename} className="w-full h-36 object-cover rounded-xl mb-3" />
+                  <img src={getAssetUrl(m.url)} alt={m.filename} className="w-full h-36 object-cover rounded-xl mb-3" />
                   <p className="text-xs font-bold truncate mb-2">{m.filename}</p>
                   <div className="flex items-center justify-between">
                     <button
@@ -1258,7 +1274,7 @@ export const AdminDashboardPage = () => {
 
             {/* TESTIMONIAL FORM */}
             {modalType === 'testimonial' && (
-              <form onSubmit={handleSaveTestimonial} className="space-y-4">
+              <form onSubmit={handleSaveTestimonial} className="space-y-4 max-h-[80vh] overflow-y-auto pr-1">
                 <div>
                   <label className="block text-xs font-bold text-[#101946] mb-1">Client Name</label>
                   <input
@@ -1289,7 +1305,118 @@ export const AdminDashboardPage = () => {
                     className="w-full border border-[#E2E8F0] rounded-xl px-4 py-2 text-sm"
                   />
                 </div>
-                <button type="submit" className="w-full bg-[#101946] text-[#B8FF00] font-bold py-3 rounded-xl">
+
+                {/* TESTIMONIAL IMAGE SECTION */}
+                <div className="pt-3 border-t border-[#E2E8F0] space-y-3">
+                  <label className="block text-xs font-bold text-[#101946]">Testimonial Photo</label>
+
+                  {/* Image Preview if selected */}
+                  {formInput.image ? (
+                    <div className="flex items-center gap-3.5 p-3 bg-[#F7F8FA] rounded-2xl border border-[#E2E8F0]">
+                      <img
+                        src={getAssetUrl(formInput.image)}
+                        alt="Selected testimonial avatar"
+                        className="w-14 h-14 rounded-full object-cover border-2 border-[#101946] shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src =
+                            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80';
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-[#101946] truncate">{formInput.image}</p>
+                        <p className="text-[10px] text-[#64748B]">Active image for this testimonial</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormInput({ ...formInput, image: '' })}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
+                        title="Remove image"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#64748B]">No photo selected. A default avatar will be shown.</p>
+                  )}
+
+                  {/* Upload button */}
+                  <div>
+                    <label className="cursor-pointer inline-flex items-center gap-2 bg-[#101946] text-[#B8FF00] font-bold text-xs px-3.5 py-2 rounded-xl hover:bg-[#171B4B] transition-all">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload New Image</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          try {
+                            const res = await API.post('/media', formData, {
+                              headers: { 'Content-Type': 'multipart/form-data' },
+                            });
+                            setMediaList((prev) => [res.data, ...prev]);
+                            setFormInput((prev) => ({ ...prev, image: res.data.url }));
+                            showToast('Image uploaded and selected!');
+                          } catch (err) {
+                            alert('Failed to upload image');
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {/* Pick from Media Library */}
+                  {mediaList.length > 0 && (
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[11px] font-bold text-[#64748B]">Or select from uploaded Media Library:</span>
+                      <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-36 overflow-y-auto p-2 bg-[#F7F8FA] rounded-xl border border-[#E2E8F0]">
+                        {mediaList.map((m) => {
+                          const isSelected = formInput.image === m.url;
+                          return (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => setFormInput({ ...formInput, image: m.url })}
+                              className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all ${
+                                isSelected ? 'border-[#101946] ring-2 ring-[#B8FF00]' : 'border-transparent hover:border-gray-400'
+                              }`}
+                              title={m.filename}
+                            >
+                              <img
+                                src={getAssetUrl(m.url)}
+                                alt={m.filename}
+                                className="w-full h-full object-cover"
+                              />
+                              {isSelected && (
+                                <div className="absolute inset-0 bg-[#101946]/50 flex items-center justify-center">
+                                  <Check className="w-5 h-5 text-[#B8FF00]" />
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Manual URL field */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-[#64748B] mb-1">Image URL / Path</label>
+                    <input
+                      type="text"
+                      placeholder="/uploads/... or https://..."
+                      value={formInput.image || ''}
+                      onChange={(e) => setFormInput({ ...formInput, image: e.target.value })}
+                      className="w-full border border-[#E2E8F0] rounded-xl px-3 py-1.5 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="w-full bg-[#101946] text-[#B8FF00] font-bold py-3 rounded-xl hover:bg-[#171B4B] transition-all">
                   Save Testimonial
                 </button>
               </form>

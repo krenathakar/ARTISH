@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import API from '../services/api';
+import API, { getAssetUrl } from '../services/api';
 
 const fallbackTestimonials = [
   {
@@ -83,11 +83,16 @@ export const TestimonialsSection = () => {
               <div className="flex items-center gap-4">
                 <img
                   src={
-                    activeTestimonial.image ||
+                    getAssetUrl(activeTestimonial.image) ||
                     'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
                   }
                   alt={activeTestimonial.name}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-[#101946]"
+                  className="w-14 h-14 rounded-full object-cover border-2 border-[#101946] shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src =
+                      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80';
+                  }}
                 />
                 <div>
                   <h4 className="text-base font-extrabold text-[#101946]">

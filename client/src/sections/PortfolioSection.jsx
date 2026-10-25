@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { InstagramIcon } from '../components/BrandIcons';
-import API from '../services/api';
+import API, { getAssetUrl } from '../services/api';
 
 const fallbackPortfolio = [
   {
@@ -133,7 +133,7 @@ export const PortfolioSection = () => {
             >
               <div className="relative h-64 overflow-hidden bg-black">
                 <img
-                  src={project.image || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80'}
+                  src={getAssetUrl(project.image) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80'}
                   alt={project.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -182,7 +182,7 @@ export const PortfolioSection = () => {
             </h3>
 
             <img
-              src={selectedProject.image}
+              src={getAssetUrl(selectedProject.image)}
               alt={selectedProject.title}
               className="w-full h-64 object-cover rounded-2xl mb-4 border border-[#E2E8F0]"
             />
