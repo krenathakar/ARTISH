@@ -7,11 +7,11 @@ const whyCards = [
   },
   {
     title: 'Fast Delivery',
-    description: 'Briefed Monday, posted by Friday. Speed without compromising quality.',
+    description: 'Your work will be delivered within two working days.',
   },
   {
     title: 'Results Driven',
-    description: 'We track reach, engagement, leads and footfall — not just vanity metrics.',
+    description: 'We track reach, engagement, leads and footfall, not just vanity metrics.',
   },
   {
     title: 'Personal Support',

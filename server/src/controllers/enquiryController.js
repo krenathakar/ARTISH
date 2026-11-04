@@ -1,45 +1,129 @@
 const prisma = require('../config/db');
-const { sendConsultationEmails } = require('../services/emailService');
+const { sendEnquiryNotification } = require('../utils/mailer');
 
 // @desc    Submit consultation form (Public)
 // @route   POST /api/enquiries
 const createEnquiry = async (req, res, next) => {
   try {
-    const { fullName, businessName, email, phone, service, message } = req.body;
+    const {
+      fullName,
+      businessName,
+      email,
+      phone,
+      service,
+      message,
+      botField,
+      bot_field,
+      hp_field,
+    } = req.body || {};
 
-    // Backend validation
+    console.log('----------------------------------------------------------------------');
+    console.log('📥 [DIAGNOSTIC 1/4] POST /api/enquiries reached controller:');
+    console.log(`   Customer: "${fullName || 'N/A'}" | Business: "${businessName || 'N/A'}" | Email: "${email || 'N/A'}"`);
+    console.log(`   Service: "${service || 'N/A'}" | Phone: "${phone || 'N/A'}"`);
+
+    // 1. Spam protection: Honeypot trap check
+    if (botField || bot_field || hp_field) {
+      console.warn('⚠️ [Spam Blocked] Consultation submission rejected via honeypot field.');
+      return res.status(400).json({ message: 'Invalid submission.' });
+    }
+
+    // 2. Validate required fields
     if (!fullName || !businessName || !email || !service || !message) {
+      console.warn('⚠️ [Validation Failed] Missing required fields in request body.');
       return res.status(400).json({ message: 'Please fill in all required fields.' });
     }
 
+    const trimmedName = String(fullName).trim();
+    const trimmedBusiness = String(businessName).trim();
+    const trimmedEmail = String(email).trim().toLowerCase();
+    const trimmedPhone = phone ? String(phone).trim() : null;
+    const trimmedService = String(service).trim();
+    const trimmedMessage = String(message).trim();
+
+    if (trimmedName.length < 2 || trimmedName.length > 100) {
+      return res.status(400).json({ message: 'Name must be between 2 and 100 characters.' });
+    }
+
+    if (trimmedBusiness.length < 2 || trimmedBusiness.length > 100) {
+      return res.status(400).json({ message: 'Business name must be between 2 and 100 characters.' });
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(trimmedEmail) || trimmedEmail.length > 150) {
       return res.status(400).json({ message: 'Please enter a valid email address.' });
     }
 
+    if (trimmedPhone && trimmedPhone.length > 30) {
+      return res.status(400).json({ message: 'Phone number is too long (max 30 characters).' });
+    }
+
+    if (trimmedMessage.length < 5 || trimmedMessage.length > 3000) {
+      return res.status(400).json({ message: 'Message must be between 5 and 3000 characters.' });
+    }
+
+    // 3. Prevent duplicate submissions within a 30-second window
+    const duplicateWindow = new Date(Date.now() - 30 * 1000);
+    const recentDuplicate = await prisma.enquiry.findFirst({
+      where: {
+        email: trimmedEmail,
+        service: trimmedService,
+        createdAt: { gte: duplicateWindow },
+      },
+    });
+
+    if (recentDuplicate) {
+      console.warn(`⚠️ [Duplicate Blocked] Recent duplicate enquiry found for ${trimmedEmail}`);
+      return res.status(429).json({
+        message: 'A consultation request was recently submitted. Please wait a moment before trying again.',
+      });
+    }
+
+    // 4. Save enquiry into the database
     const enquiry = await prisma.enquiry.create({
       data: {
-        fullName,
-        businessName,
-        email: email.toLowerCase().trim(),
-        phone: phone || null,
-        service,
-        message,
+        fullName: trimmedName,
+        businessName: trimmedBusiness,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        service: trimmedService,
+        message: trimmedMessage,
         status: 'NEW',
       },
     });
 
-    // Trigger Nodemailer notifications in background
-    sendConsultationEmails(enquiry).catch((err) =>
-      console.error('Failed to send consultation emails:', err)
-    );
+    console.log(`💾 [DIAGNOSTIC 2/4] Enquiry successfully saved to database:`);
+    console.log(`   ID: ${enquiry.id} | Status: ${enquiry.status} | CreatedAt: ${enquiry.createdAt.toISOString()}`);
+    console.log(`   Visible in Admin Panel: YES (Database ID #${enquiry.id})`);
 
-    res.status(201).json({
+    // 5. Deliver notification email to info@artishmedia.com
+    console.log(`📤 [DIAGNOSTIC 3/4] Immediately before email sending for Enquiry #${enquiry.id}...`);
+    let emailResult = { delivered: false };
+    try {
+      emailResult = await sendEnquiryNotification(enquiry);
+    } catch (emailErr) {
+      console.error(`❌ [DIAGNOSTIC] Uncaught exception during email dispatch:`, emailErr.message);
+      emailResult = { delivered: false, error: emailErr.message };
+    }
+
+    console.log(`🏁 [DIAGNOSTIC 4/4] After email sending for Enquiry #${enquiry.id}:`);
+    console.log(`   Email Delivered: ${emailResult.delivered ? 'YES ✅' : 'NO ❌'}`);
+    if (!emailResult.delivered) {
+      console.log(`   Failure Reason: ${emailResult.error || 'Check SMTP configuration'}`);
+    } else {
+      console.log(`   Message ID: ${emailResult.messageId || 'N/A'}`);
+    }
+    console.log('----------------------------------------------------------------------');
+
+    // 6. Return response to client
+    return res.status(201).json({
       success: true,
       message: "Thank you! Your consultation request has been received. We'll get back to you within 24 hours.",
       enquiryId: enquiry.id,
+      emailSent: Boolean(emailResult?.delivered),
     });
   } catch (error) {
+    console.error('❌ [Enquiry Route Error]:', error);
     next(error);
   }
 };
@@ -83,7 +167,7 @@ const getEnquiryById = async (req, res, next) => {
     const { id } = req.params;
 
     const enquiry = await prisma.enquiry.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id, 10) },
     });
 
     if (!enquiry) {
@@ -104,7 +188,7 @@ const updateEnquiry = async (req, res, next) => {
     const { status, notes } = req.body;
 
     const existing = await prisma.enquiry.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id, 10) },
     });
 
     if (!existing) {
@@ -112,7 +196,7 @@ const updateEnquiry = async (req, res, next) => {
     }
 
     const updated = await prisma.enquiry.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id, 10) },
       data: {
         status: status || existing.status,
         notes: notes !== undefined ? notes : existing.notes,
@@ -132,7 +216,7 @@ const deleteEnquiry = async (req, res, next) => {
     const { id } = req.params;
 
     await prisma.enquiry.delete({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id, 10) },
     });
 
     res.json({ message: 'Enquiry deleted' });

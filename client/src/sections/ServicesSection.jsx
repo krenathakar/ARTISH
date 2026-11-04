@@ -95,18 +95,15 @@ export const ServicesSection = () => {
         <div className="text-center max-w-4xl lg:max-w-5xl mx-auto mb-16 space-y-4 sm:space-y-5 px-2">
           {/* Main Heading */}
           <h2 className="text-2xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold text-[#101946] tracking-tight leading-[1.25] text-balance">
-            <span className="block sm:inline">Creative that gets </span>
-            <span className="inline-block">
-              your brand{' '}
-              <span className="relative inline-block text-[#101946] bg-[#B8FF00] px-2.5 sm:px-3 py-0.5 rounded-lg sm:rounded-xl shadow-xs">
-                noticed.
-              </span>
+            <span>Everything your brand needs to </span>
+            <span className="relative inline-block text-[#101946] bg-[#B8FF00] px-2.5 sm:px-3 py-0.5 rounded-lg sm:rounded-xl shadow-xs">
+              stand out.
             </span>
           </h2>
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-[#64748B] leading-relaxed max-w-2xl mx-auto text-balance">
-            From scroll stopping content to social media management, campaigns and events, we help businesses turn their ideas into content people remember.
+            From content creation and social media management to marketing campaigns and event production, we bring your brand closer to the people who matter.
           </p>
         </div>
 

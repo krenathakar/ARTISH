@@ -8,5 +8,8 @@
     "client": "npm run dev --prefix client",
     "server": "npm run dev --prefix server",
     "lint": "npm run lint --prefix client"
+  },
+  "dependencies": {
+    "cors": "^2.8.6"
   }
 }

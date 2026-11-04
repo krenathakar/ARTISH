@@ -1,70 +1,91 @@
 import React, { useEffect, useMemo, useState } from "react";
+import API, { getAssetUrl } from "../services/api";
+import { getYouTubeEmbedUrl } from "../utils/videoUtils";
 
-// Existing reel items + additional valid mp4 files from /public/videos
-const reels = [
+// Existing reel items as resilient fallback if API is unreachable
+const defaultReels = [
   {
     id: 1,
     category: "Restaurants",
     title: "Shayona Restaurant",
     video: "/videos/shayona-first.mp4",
+    videoType: "MP4",
   },
   {
     id: 2,
     category: "Events",
     title: "Harsh & Jatin",
     video: "/videos/harsh-jatin.mp4",
+    videoType: "MP4",
   },
   {
     id: 3,
     category: "Restaurants",
     title: "GJ 05",
     video: "/videos/gj05.mp4",
+    videoType: "MP4",
   },
   {
     id: 4,
     category: "Events",
     title: "Om Nom Event",
     video: "/videos/om-nom-event.mp4",
+    videoType: "MP4",
   },
   {
     id: 5,
     category: "Business Promotions",
     title: "Gujarat No Rankar",
     video: "/videos/gujrat-no-rankar.mp4",
+    videoType: "MP4",
   },
   {
     id: 6,
     category: "Podcasts",
     title: "Asmita Reel",
     video: "/videos/asmita-reel.mp4",
+    videoType: "MP4",
   },
   {
     id: 7,
     category: "Events",
     title: "Panchmasi Event",
     video: "/videos/panchmasi.mp4",
+    videoType: "MP4",
   },
   {
     id: 8,
     category: "Business Promotions",
-    title: "The Woodman",
+    title: "Jatin Woodman",
     video: "/videos/IMG_2382.mp4",
     thumbnail: "/videos/IMG_2382-thumb.jpg",
+    videoType: "MP4",
+  },
+  {
+    id: 9,
+    category: "Restaurants",
+    title: "Royals Handi Restaurant",
+    video: "/videos/royals-handi.mp4",
+    videoType: "MP4",
   },
 ];
 
-const categories = [
+const standardCategories = [
   "All",
   "Restaurants",
   "Events",
-  "Podcasts",
   "Business Promotions",
+  "Podcasts",
 ];
 
 function ReelCard({ reel, onPlay, onVideoError }) {
   const [hasError, setHasError] = useState(false);
 
   const handleError = () => {
+    // Local /videos/ files must never be hidden
+    if (reel.video && (reel.video.startsWith('/videos/') || !reel.video.startsWith('http'))) {
+      return;
+    }
     setHasError(true);
     if (onVideoError) {
       onVideoError(reel.id);
@@ -73,21 +94,32 @@ function ReelCard({ reel, onPlay, onVideoError }) {
 
   if (hasError) return null;
 
+  const isDirectVideo = reel.videoType === "MP4" || (!reel.videoType && reel.video?.endsWith(".mp4"));
+
   return (
     <article className="reel-card">
       {/* VIDEO AREA */}
       <div className="reel-media">
-        <video
-          src={reel.video}
-          poster={reel.thumbnail}
-          muted
-          loop
-          autoPlay
-          playsInline
-          preload="metadata"
-          className="reel-video"
-          onError={handleError}
-        />
+        {isDirectVideo ? (
+          <video
+            src={reel.video}
+            poster={reel.thumbnail}
+            muted
+            loop
+            autoPlay
+            playsInline
+            preload="metadata"
+            className="reel-video"
+            onError={handleError}
+          />
+        ) : (
+          <img
+            src={reel.thumbnail || "/videos/hero-artish-poster.webp"}
+            alt={reel.title}
+            className="reel-video object-cover"
+            onError={handleError}
+          />
+        )}
 
         {/* Dark bottom gradient */}
         <div className="reel-gradient" />
@@ -137,6 +169,7 @@ function ReelCard({ reel, onPlay, onVideoError }) {
 }
 
 export default function RecentReelsSection() {
+  const [reelsList, setReelsList] = useState(defaultReels);
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedReel, setSelectedReel] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -145,6 +178,52 @@ export default function RecentReelsSection() {
   const [visibleCards, setVisibleCards] = useState(4);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPublicReels = async () => {
+      try {
+        const res = await API.get('/videos/public');
+        if (isMounted && Array.isArray(res.data)) {
+          if (res.data.length > 0) {
+            const mapped = res.data.map((v) => ({
+              id: v.id,
+              category: v.category || 'Restaurants',
+              title: v.title,
+              video: getAssetUrl(v.videoUrl),
+              thumbnail: v.thumbnailUrl ? getAssetUrl(v.thumbnailUrl) : null,
+              videoType: v.videoType || 'MP4',
+              rawUrl: v.videoUrl,
+              displayOrder: v.displayOrder !== undefined ? v.displayOrder : 99,
+            }));
+            setReelsList(mapped);
+          } else {
+            setReelsList([]);
+          }
+        }
+      } catch (err) {
+        // Silently preserve defaultReels on network or API error
+      }
+    };
+    fetchPublicReels();
+    window.addEventListener('artish:videos-updated', fetchPublicReels);
+    window.addEventListener('focus', fetchPublicReels);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('artish:videos-updated', fetchPublicReels);
+      window.removeEventListener('focus', fetchPublicReels);
+    };
+  }, []);
+
+  const categories = useMemo(() => {
+    const list = [...standardCategories];
+    reelsList.forEach((r) => {
+      if (r.category && !list.includes(r.category)) {
+        list.push(r.category);
+      }
+    });
+    return list;
+  }, [reelsList]);
 
   // Handle Video Error gracefully
   const handleVideoError = (id) => {
@@ -155,12 +234,12 @@ export default function RecentReelsSection() {
     });
   };
 
-  // Filter valid reels (excluding failed or missing videos)
+  // Filter valid reels (ensuring original /videos/ are never filtered out)
   const validReels = useMemo(() => {
-    return reels.filter(
-      (reel) => reel.video && !failedVideoIds.has(reel.id)
+    return reelsList.filter(
+      (reel) => reel.video && (!failedVideoIds.has(reel.id) || reel.video.startsWith('/videos/'))
     );
-  }, [failedVideoIds]);
+  }, [reelsList, failedVideoIds]);
 
   // Filter reels according to active category
   const filteredReels = useMemo(() => {
@@ -270,6 +349,7 @@ export default function RecentReelsSection() {
 
   return (
     <section id="reels" className="recent-reels-section">
+      <span id="portfolio" className="sr-only" />
       <div className="recent-reels-container">
         {/* HEADER */}
         <div className="recent-reels-header">
@@ -409,14 +489,49 @@ export default function RecentReelsSection() {
               ×
             </button>
 
-            <video
-              src={selectedReel.video}
-              poster={selectedReel.thumbnail}
-              controls
-              autoPlay
-              playsInline
-              className="modal-video"
-            />
+            {selectedReel.videoType === 'YOUTUBE' || selectedReel.videoType === 'YOUTUBE_SHORTS' ? (
+              <div className="w-full max-w-[420px] aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl">
+                <iframe
+                  src={getYouTubeEmbedUrl(selectedReel.rawUrl || selectedReel.video)}
+                  title={selectedReel.title}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : selectedReel.videoType === 'INSTAGRAM' ? (
+              <div className="w-full max-w-[400px] bg-[#101946] text-white p-6 rounded-3xl border border-[#252B62] shadow-2xl text-center space-y-4">
+                <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white">
+                  <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                </div>
+                <h3 className="text-lg font-extrabold text-white">{selectedReel.title}</h3>
+                <p className="text-xs text-gray-300">
+                  This reel is hosted on Instagram. Tap below to watch the original video on Instagram.
+                </p>
+                <div className="pt-2">
+                  <a
+                    href={selectedReel.rawUrl || selectedReel.video}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#B8FF00] hover:bg-[#a5e600] text-[#101946] font-extrabold text-xs px-6 py-2.5 rounded-full transition-all shadow-md"
+                  >
+                    <span>Watch on Instagram</span>
+                    <span>↗</span>
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <video
+                src={selectedReel.video}
+                poster={selectedReel.thumbnail}
+                controls
+                autoPlay
+                playsInline
+                className="modal-video"
+              />
+            )}
           </div>
         </div>
       )}

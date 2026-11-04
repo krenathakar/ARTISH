@@ -23,11 +23,11 @@ async function main() {
   // 2. Seed Site Settings
   const settings = [
     { key: 'business_name', value: 'Artish UK' },
-    { key: 'business_email', value: 'artish.uk.2003@gmail.com' },
+    { key: 'business_email', value: 'info@artishmedia.com' },
     { key: 'instagram_url', value: 'https://www.instagram.com/artish.uk' },
     { key: 'youtube_url', value: 'https://youtube.com/@artishmedia?si=YzOlivVPhrB2GO8h' },
-    { key: 'phone', value: '' },
-    { key: 'whatsapp_url', value: '' },
+    { key: 'phone', value: '+44 7552 782519' },
+    { key: 'whatsapp_url', value: 'https://wa.me/447552782519?text=Hello%20Artish%20UK%2C%20I%20would%20like%20to%20enquire%20about%20your%20services.' },
     { key: 'location', value: 'United Kingdom · Serving nationwide' },
     { key: 'hero_badge', value: 'UK Digital Marketing & Content Agency' },
     { key: 'hero_title', value: 'Content that brings customers.' },
@@ -298,31 +298,49 @@ async function main() {
   // 6. Seed Testimonials
   const testimonials = [
     {
+      name: 'Darshan Patel',
+      company: 'Managing Director, Shayona',
+      quote: 'Artish has completely transformed how we present Shayona online. Their creativity, quick turnaround and understanding of our brand has helped us reach thousands of new customers across London.\n\nFrom high-impact reels to consistent social media management, the results speak for themselves. Footfall is up, engagement is higher than ever, and our brand finally looks the way it deserves to.',
+      rating: 5,
+      image: '/images/partners/shayona-restaurant.jpg',
+      isPublished: true,
+      sortOrder: 1,
+    },
+    {
+      name: 'Tushar Patel',
+      company: 'Owner, HK Furniture',
+      quote: 'Working with Artish was one of the best marketing decisions we made this year. They took the time to understand our bespoke furniture business and created content that truly showcases the quality of our craftsmanship.\n\nOur enquiries have significantly increased, and customers regularly mention seeing our videos before visiting the showroom. Professional, reliable and exceptionally talented.',
+      rating: 5,
+      image: null,
+      isPublished: true,
+      sortOrder: 2,
+    },
+    {
       name: 'Priya Patel',
       company: 'Shayona Restaurant',
       quote: 'Artish transformed our online presence. Reels they made for us went viral and brought a packed restaurant every weekend.',
       rating: 5,
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+      image: '/images/partners/shayona-restaurant.jpg',
       isPublished: true,
-      sortOrder: 1,
+      sortOrder: 3,
     },
     {
       name: 'Marcus Vance',
       company: 'Soundwave Studio',
       quote: 'The podcast production quality is outstanding. Our engagement multiplied by 3x within two months of working with Artish UK.',
       rating: 5,
-      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      image: null,
       isPublished: true,
-      sortOrder: 2,
+      sortOrder: 4,
     },
     {
       name: 'Rahul Sharma',
       company: 'Rajdhani Express',
       quote: 'Fast, creative, and extremely results-driven. They understand food marketing better than anyone else in the UK.',
       rating: 5,
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+      image: '/images/partners/rajdhani-express.jpg',
       isPublished: true,
-      sortOrder: 3,
+      sortOrder: 5,
     },
   ];
 
@@ -375,6 +393,108 @@ async function main() {
     }
   }
   console.log('✅ FAQs seeded.');
+
+  // 8. Seed Videos / Reels
+  const initialVideos = [
+    {
+      title: 'Shayona Restaurant',
+      category: 'Restaurants',
+      videoUrl: '/videos/shayona-first.mp4',
+      thumbnailUrl: null,
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 1,
+      featured: true,
+    },
+    {
+      title: 'Harsh & Jatin',
+      category: 'Events',
+      videoUrl: '/videos/harsh-jatin.mp4',
+      thumbnailUrl: null,
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 2,
+      featured: false,
+    },
+    {
+      title: 'GJ 05',
+      category: 'Restaurants',
+      videoUrl: '/videos/gj05.mp4',
+      thumbnailUrl: null,
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 3,
+      featured: false,
+    },
+    {
+      title: 'Om Nom Event',
+      category: 'Events',
+      videoUrl: '/videos/om-nom-event.mp4',
+      thumbnailUrl: null,
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 4,
+      featured: false,
+    },
+    {
+      title: 'Gujarat No Rankar',
+      category: 'Business Promotions',
+      videoUrl: '/videos/gujrat-no-rankar.mp4',
+      thumbnailUrl: null,
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 5,
+      featured: false,
+    },
+    {
+      title: 'Asmita Reel',
+      category: 'Podcasts',
+      videoUrl: '/videos/asmita-reel.mp4',
+      thumbnailUrl: null,
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 6,
+      featured: false,
+    },
+    {
+      title: 'Panchmasi Event',
+      category: 'Events',
+      videoUrl: '/videos/panchmasi.mp4',
+      thumbnailUrl: null,
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 7,
+      featured: false,
+    },
+    {
+      title: 'Jatin Woodman',
+      category: 'Business Promotions',
+      videoUrl: '/videos/IMG_2382.mp4',
+      thumbnailUrl: '/videos/IMG_2382-thumb.jpg',
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 8,
+      featured: true,
+    },
+    {
+      title: 'Royals Handi Restaurant',
+      category: 'Restaurants',
+      videoUrl: '/videos/royals-handi.mp4',
+      thumbnailUrl: null,
+      videoType: 'MP4',
+      status: 'PUBLISHED',
+      displayOrder: 9,
+      featured: false,
+    },
+  ];
+
+  for (const v of initialVideos) {
+    const existing = await prisma.video.findFirst({ where: { title: v.title } });
+    if (!existing) {
+      await prisma.video.create({ data: v });
+    }
+  }
+  console.log('✅ Videos / Reels seeded.');
 
   console.log('🎉 Seed completed successfully!');
 }

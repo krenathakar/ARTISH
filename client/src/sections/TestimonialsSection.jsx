@@ -1,37 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import API, { getAssetUrl } from '../services/api';
 
 const fallbackTestimonials = [
   {
     id: 1,
+    name: 'Darshan Patel',
+    company: 'Managing Director, Shayona',
+    quote: `Artish has completely transformed how we present Shayona online. Their creativity, quick turnaround and understanding of our brand has helped us reach thousands of new customers across London.
+
+From high-impact reels to consistent social media management, the results speak for themselves. Footfall is up, engagement is higher than ever, and our brand finally looks the way it deserves to.`,
+    rating: 5,
+    image: '/images/partners/shayona-restaurant.jpg',
+  },
+  {
+    id: 2,
+    name: 'Tushar Patel',
+    company: 'Owner, HK Furniture',
+    quote: `Working with Artish was one of the best marketing decisions we made this year. They took the time to understand our bespoke furniture business and created content that truly showcases the quality of our craftsmanship.
+
+Our enquiries have significantly increased, and customers regularly mention seeing our videos before visiting the showroom. Professional, reliable and exceptionally talented.`,
+    rating: 5,
+    image: null,
+  },
+  {
+    id: 3,
     name: 'Priya Patel',
     company: 'Shayona Restaurant',
     quote: 'Artish transformed our online presence. Reels they made for us went viral and brought a packed restaurant every weekend.',
     rating: 5,
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+    image: '/images/partners/shayona-restaurant.jpg',
   },
   {
-    id: 2,
+    id: 4,
     name: 'Marcus Vance',
     company: 'Soundwave Studio',
     quote: 'The podcast production quality is outstanding. Our engagement multiplied by 3x within two months of working with Artish UK.',
     rating: 5,
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    image: null,
   },
   {
-    id: 3,
+    id: 5,
     name: 'Rahul Sharma',
     company: 'Rajdhani Express',
     quote: 'Fast, creative, and extremely results-driven. They understand food marketing better than anyone else in the UK.',
     rating: 5,
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+    image: '/images/partners/rajdhani-express.jpg',
   },
 ];
+
+const getInitials = (name) => {
+  if (!name) return 'A';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+  return parts[0].slice(0, 2).toUpperCase();
+};
 
 export const TestimonialsSection = () => {
   const [testimonials, setTestimonials] = useState(fallbackTestimonials);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState({});
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -56,6 +86,7 @@ export const TestimonialsSection = () => {
   };
 
   const activeTestimonial = testimonials[currentIndex] || testimonials[0];
+  const hasValidImage = activeTestimonial?.image && !failedImages[activeTestimonial.id];
 
   return (
     <section id="testimonials" className="bg-[#F7F8FA] py-24 border-b border-[#E2E8F0]">
@@ -73,27 +104,38 @@ export const TestimonialsSection = () => {
         {/* Carousel Container */}
         <div className="max-w-4xl mx-auto relative">
           <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#E2E8F0] shadow-xl relative overflow-hidden text-left">
+            {/* Star Rating */}
+            <div className="flex items-center gap-1 mb-5">
+              {Array.from({ length: activeTestimonial.rating || 5 }).map((_, i) => (
+                <Star key={i} className="w-5 h-5 fill-[#FFB800] text-[#FFB800]" />
+              ))}
+            </div>
+
             {/* Quote */}
-            <blockquote className="text-lg sm:text-2xl font-bold text-[#101946] leading-relaxed mb-8">
+            <blockquote className="text-lg sm:text-2xl font-bold text-[#101946] leading-relaxed mb-8 whitespace-pre-line">
               "{activeTestimonial.quote}"
             </blockquote>
 
             {/* Client Profile */}
             <div className="flex items-center justify-between pt-6 border-t border-[#E2E8F0]">
               <div className="flex items-center gap-4">
-                <img
-                  src={
-                    getAssetUrl(activeTestimonial.image) ||
-                    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
-                  }
-                  alt={activeTestimonial.name}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-[#101946] shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src =
-                      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80';
-                  }}
-                />
+                {hasValidImage ? (
+                  <img
+                    src={getAssetUrl(activeTestimonial.image)}
+                    alt={activeTestimonial.name}
+                    className="w-14 h-14 rounded-full object-cover border-2 border-[#101946] shrink-0 bg-white"
+                    onError={() =>
+                      setFailedImages((prev) => ({ ...prev, [activeTestimonial.id]: true }))
+                    }
+                  />
+                ) : (
+                  <div
+                    className="w-14 h-14 rounded-full bg-[#101946] text-[#B8FF00] font-extrabold text-base flex items-center justify-center border-2 border-[#101946] shrink-0 tracking-wider shadow-sm select-none"
+                    aria-label={activeTestimonial.name}
+                  >
+                    {getInitials(activeTestimonial.name)}
+                  </div>
+                )}
                 <div>
                   <h4 className="text-base font-extrabold text-[#101946]">
                     {activeTestimonial.name}

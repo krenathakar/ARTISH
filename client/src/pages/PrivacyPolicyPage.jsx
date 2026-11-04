@@ -32,7 +32,7 @@ export const PrivacyPolicyPage = () => {
 
           <h3 className="text-lg font-extrabold text-[#101946]">4. Contact</h3>
           <p>
-            For any data privacy inquiries, please contact us directly at <a href="mailto:artish.uk.2003@gmail.com" className="text-[#101946] font-bold hover:underline">artish.uk.2003@gmail.com</a>.
+            For any data privacy inquiries, please contact us directly at <a href="mailto:info@artishmedia.com" className="text-[#101946] font-bold hover:underline">info@artishmedia.com</a> or call <a href="tel:+447552782519" className="text-[#101946] font-bold hover:underline">+44 7552 782519</a>.
           </p>
         </div>
       </div>

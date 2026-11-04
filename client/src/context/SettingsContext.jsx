@@ -6,13 +6,13 @@ const SettingsContext = createContext();
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
     business_name: 'Artish UK',
-    business_email: 'artish.uk.2003@gmail.com',
+    business_email: 'info@artishmedia.com',
     instagram_url: 'https://www.instagram.com/artish.uk',
     youtube_url: 'https://youtube.com/@artishmedia?si=YzOlivVPhrB2GO8h',
     facebook_url: 'https://www.facebook.com/profile.php?id=61590765263393#',
     tiktok_url: 'https://www.tiktok.com/@artish711',
-    phone: '',
-    whatsapp_url: '',
+    phone: '+44 7552 782519',
+    whatsapp_url: 'https://wa.me/447552782519?text=Hello%20Artish%20UK%2C%20I%20would%20like%20to%20enquire%20about%20your%20services.',
     location: 'United Kingdom · Serving nationwide',
     hero_badge: 'UK Digital Marketing & Content Agency',
     hero_title: 'Content that brings customers.',

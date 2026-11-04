@@ -130,3 +130,18 @@ model Media {
   altText   String?
   createdAt DateTime @default(now())
 }
+
+model Video {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String?  @db.Text
+  videoUrl     String   @db.Text
+  thumbnailUrl String?  @db.Text
+  category     String   @default("Restaurants")
+  videoType    String   @default("MP4")
+  status       String   @default("PUBLISHED")
+  displayOrder Int      @default(0)
+  featured     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
