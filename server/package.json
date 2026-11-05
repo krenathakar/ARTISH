@@ -6,13 +6,14 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "start": "node start.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "node prisma/seed.js",
     "test:email": "node src/scripts/testEmail.js",
     "build": "prisma generate",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "start:api": "node src/server.js"
   },
   "dependencies": {
     "@prisma/client": "^6.4.0",
