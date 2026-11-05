@@ -11,7 +11,7 @@
     "prisma:migrate": "prisma migrate dev",
     "seed": "node prisma/seed.js",
     "test:email": "node src/scripts/testEmail.js",
-    "build": "prisma generate",
+    "build": "prisma generate && node setup-db.js",
     "postinstall": "prisma generate",
     "start:api": "node src/server.js"
   },
