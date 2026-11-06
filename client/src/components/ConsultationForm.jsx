@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { CheckCircle2, AlertCircle, Loader2, Send, Sparkles, RefreshCw } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Send, RefreshCw } from 'lucide-react';
 import { submitConsultationEnquiry } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 
@@ -127,12 +127,6 @@ export const ConsultationForm = () => {
       className="bg-[#F7F8FA] p-8 sm:p-10 rounded-3xl border border-[#E2E8F0] shadow-xl text-left transition-all"
     >
       <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101946]/5 border border-[#101946]/10 mb-3">
-          <Sparkles className="w-3.5 h-3.5 text-[#101946]" />
-          <span className="text-xs font-bold text-[#101946] uppercase tracking-wider">
-            Free Strategy Call & Fixed Quote
-          </span>
-        </div>
         <h3 className="text-2xl sm:text-3xl font-extrabold text-[#101946] tracking-tight mb-2">
           Book a free consultation
         </h3>

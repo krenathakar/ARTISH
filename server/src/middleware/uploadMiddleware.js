@@ -19,10 +19,8 @@ const storage = multer.diskStorage({
 });
 
 function checkFileType(file, cb) {
-  const filetypes = /jpg|jpeg|png|webp|gif|mp4|webm|svg/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-
+  const extname = /\.(jpg|jpeg|png|webp|gif|svg|mp4|webm|mov|m4v|avi|mkv|ogv|3gp)$/i.test(file.originalname);
+  const mimetype = /^(image|video)\//.test(file.mimetype) || file.mimetype === 'application/octet-stream';
   if (extname && mimetype) {
     return cb(null, true);
   } else {
@@ -32,7 +30,7 @@ function checkFileType(file, cb) {
 
 const upload = multer({
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max for images and video clips
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB max for images and video clips
   fileFilter(req, file, cb) {
     checkFileType(file, cb);
   },

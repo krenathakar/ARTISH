@@ -417,8 +417,8 @@ export const AdminDashboardPage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      alert('Video file size exceeds 50MB. Please select a smaller video or compress it.');
+    if (file.size > 500 * 1024 * 1024) {
+      alert('Video file size exceeds 500MB. Please select a smaller video or compress it.');
       return;
     }
 
