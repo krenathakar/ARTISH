@@ -6,8 +6,8 @@ import { useAuth } from '../context/AuthContext';
 export const AdminLoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@artish.uk');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -58,6 +58,7 @@ export const AdminLoginPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full bg-[#101946] border border-[#252C6A] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#B8FF00]"
+              autoComplete="off"
               placeholder="admin@artish.uk"
             />
           </div>
@@ -72,6 +73,7 @@ export const AdminLoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full bg-[#101946] border border-[#252C6A] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#B8FF00]"
+              autoComplete="new-password"
               placeholder="••••••••"
             />
           </div>
